@@ -1,0 +1,111 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  SUPERVISOR
+  MECHANIC
+  DRIVER
+}
+
+enum BusStatus {
+  ACTIVE
+  STANDBY
+  MAINTENANCE
+}
+
+enum TicketStatus {
+  OPEN
+  ENROUTE
+  RESOLVED
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  phone     String   @unique
+  email     String?  @unique
+  password  String
+  role      Role
+  createdAt DateTime @default(now())
+}
+
+model Route {
+  id         String   @id @default(uuid())
+  name       String
+  startPoint String
+  endPoint   String
+  createdAt  DateTime @default(now())
+
+  buses Bus[]
+}
+
+model Bus {
+  id          String    @id @default(uuid())
+  plateNumber String    @unique
+  model       String
+  status      BusStatus @default(STANDBY)
+  gpsDeviceId String?
+  routeId     String
+  createdAt   DateTime  @default(now())
+
+  route       Route               @relation(fields: [routeId], references: [id])
+  shifts      Shift[]
+  remittances Remittance[]
+  maintenance MaintenanceTicket[]
+}
+
+model Driver {
+  id        String   @id @default(uuid())
+  name      String
+  phone     String   @unique
+  licenseNo String
+  createdAt DateTime @default(now())
+
+  shifts      Shift[]
+  remittances Remittance[]
+}
+
+model Shift {
+  id        String   @id @default(uuid())
+  busId     String
+  driverId  String
+  startTime DateTime
+  endTime   DateTime
+  confirmed Boolean  @default(false)
+
+  bus    Bus    @relation(fields: [busId], references: [id])
+  driver Driver @relation(fields: [driverId], references: [id])
+}
+
+model Remittance {
+  id             String   @id @default(uuid())
+  busId          String
+  driverId       String
+  date           DateTime
+  expectedAmount Int
+  reportedAmount Int
+  approved       Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  bus    Bus    @relation(fields: [busId], references: [id])
+  driver Driver @relation(fields: [driverId], references: [id])
+}
+
+model MaintenanceTicket {
+  id         String       @id @default(uuid())
+  busId      String
+  issue      String
+  status     TicketStatus @default(OPEN)
+  createdAt  DateTime     @default(now())
+  resolvedAt DateTime?
+
+  bus Bus @relation(fields: [busId], references: [id])
+}
