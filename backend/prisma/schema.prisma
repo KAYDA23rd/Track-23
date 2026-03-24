@@ -34,7 +34,10 @@ model User {
   email     String?  @unique
   password  String
   role      Role
+  isActive  Boolean  @default(true)
+  approvedAt DateTime?
   createdAt DateTime @default(now())
+  driverLocation DriverLocation?
 }
 
 model Route {
@@ -42,6 +45,10 @@ model Route {
   name       String
   startPoint String
   endPoint   String
+  startLat   Float?
+  startLng   Float?
+  endLat     Float?
+  endLng     Float?
   createdAt  DateTime @default(now())
 
   buses Bus[]
@@ -108,4 +115,25 @@ model MaintenanceTicket {
   resolvedAt DateTime?
 
   bus Bus @relation(fields: [busId], references: [id])
+}
+
+model RemittanceConfig {
+  id             Int      @id
+  expectedAmount Int      @default(25000)
+  updatedAt      DateTime @updatedAt
+}
+
+model DriverLocation {
+  id         String   @id @default(uuid())
+  userId     String   @unique
+  busId      String?
+  lat        Float
+  lng        Float
+  speedKph   Float?
+  heading    Float?
+  accuracyM  Float?
+  recordedAt DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
 }

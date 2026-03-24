@@ -1,5 +1,19 @@
 const jwt = require("jsonwebtoken");
 
+const ROLE_RANK = {
+  DRIVER: 1,
+  MECHANIC: 2,
+  SUPERVISOR: 3,
+  ADMIN: 4,
+  SUPER_ADMIN: 5,
+};
+
+const hasRequiredRole = (userRole, requiredRole) => {
+  const userRank = ROLE_RANK[userRole] || 0;
+  const requiredRank = ROLE_RANK[requiredRole] || 0;
+  return userRank >= requiredRank;
+};
+
 exports.protect = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
@@ -20,7 +34,7 @@ exports.protect = (req, res, next) => {
 
 exports.requireRole = (role) => {
   return (req, res, next) => {
-    if (req.user.role !== role) {
+    if (!hasRequiredRole(req.user.role, role)) {
       return res.status(403).json({ error: "Access denied" });
     }
     next();

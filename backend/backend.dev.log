@@ -1,0 +1,11 @@
+[dotenv@17.2.3] injecting env (2) from .env -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+✅ Mounting /auth routes
+✅ Mounting /routes routes
+✅ Mounting /buses routes
+✅ Mounting /drivers routes
+✅ Mounting /shifts routes
+✅ Mounting /remittances routes
+✅ Mounting /maintenance routes
+✅ Mounting /reports routes
+Mounting /tracking routes
+Server running on port 4000

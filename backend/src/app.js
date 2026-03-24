@@ -9,6 +9,7 @@ const shiftRoutes = require("./shifts/shift.routes");
 const remittanceRoutes = require("./remittances/remittance.routes");
 const maintenanceRoutes = require("./maintenance/maintenance.routes");
 const reportRoutes = require("./reports/report.routes");
+const trackingRoutes = require("./tracking/tracking.routes");
 
 const app = express();
 
@@ -38,6 +39,9 @@ app.use("/maintenance", maintenanceRoutes);
 
 console.log("✅ Mounting /reports routes");
 app.use("/reports", reportRoutes);
+
+console.log("Mounting /tracking routes");
+app.use("/tracking", trackingRoutes);
 
 app.get("/", (req, res) => {
   res.send("Track23 backend is running 🚍");

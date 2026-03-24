@@ -1,5 +1,7 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import api from "../api/api";
+import "../styles/login.css";
 
 export default function Login() {
   const [phone, setPhone] = useState("");
@@ -12,39 +14,52 @@ export default function Login() {
 
     try {
       const res = await api.post("/auth/login", { phone, password });
+      const role = res.data?.user?.role;
+      if (role !== "ADMIN" && role !== "SUPER_ADMIN") {
+        setError("Use the Driver Portal for driver accounts.");
+        return;
+      }
       localStorage.setItem("token", res.data.token);
       window.location.href = "/dashboard";
-    } catch (err) {
+    } catch {
       setError("Invalid login details");
     }
   };
 
   return (
-    <div style={{ padding: 40 }}>
-      <h2>Track23 Admin Login</h2>
+    <div className="login-shell">
+      <div className="login-card">
+        <Link className="login-kicker" to="/">
+          Track 23
+        </Link>
+        <h2>Admin Login</h2>
+        <p className="login-note">Sign in to access fleet operations and reporting.</p>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+        <form className="login-form" onSubmit={handleLogin}>
+          {error && <p className="login-error">{error}</p>}
 
-      <form onSubmit={handleLogin}>
-        <input
-          placeholder="Phone"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-        />
-        <br />
-        <br />
+          <input
+            className="login-field"
+            placeholder="Phone"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            required
+          />
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <br />
-        <br />
+          <input
+            className="login-field"
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
 
-        <button type="submit">Login</button>
-      </form>
+          <button className="login-btn" type="submit">
+            Login
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

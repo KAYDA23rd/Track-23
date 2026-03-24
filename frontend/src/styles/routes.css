@@ -1,0 +1,69 @@
+.route-workspace {
+  display: grid;
+  grid-template-columns: minmax(340px, 420px) minmax(0, 1fr);
+  gap: 16px;
+}
+
+.route-form {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.route-form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.route-form-header h3 {
+  margin: 0;
+}
+
+.route-editing-pill {
+  border: 1px solid #b7e8d7;
+  background: #e9faf3;
+  color: #0f7a58;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.route-location-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.route-location-card {
+  border: 1px solid #d9e5ef;
+  border-radius: 12px;
+  padding: 10px;
+  display: grid;
+  gap: 8px;
+  background: #fdfefe;
+}
+
+.route-location-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.route-location-head h4 {
+  margin: 0;
+  color: #143548;
+  font-size: 0.9rem;
+}
+
+.route-actions {
+  flex-wrap: wrap;
+}
+
+@media (max-width: 1200px) {
+  .route-workspace {
+    grid-template-columns: 1fr;
+  }
+}

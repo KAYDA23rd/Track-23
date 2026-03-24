@@ -1,15 +1,33 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
+const parseCoordinate = (value) => {
+  if (value === undefined || value === null || value === "") return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
 exports.createRoute = async (req, res) => {
   try {
-    const { name, startPoint, endPoint } = req.body;
+    const {
+      name,
+      startPoint,
+      endPoint,
+      startLat,
+      startLng,
+      endLat,
+      endLng,
+    } = req.body;
 
     const route = await prisma.route.create({
       data: {
         name,
         startPoint,
         endPoint,
+        startLat: parseCoordinate(startLat),
+        startLng: parseCoordinate(startLng),
+        endLat: parseCoordinate(endLat),
+        endLng: parseCoordinate(endLng),
       },
     });
 
@@ -31,11 +49,27 @@ exports.getRoutes = async (req, res) => {
 exports.updateRoute = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, startPoint, endPoint } = req.body;
+    const {
+      name,
+      startPoint,
+      endPoint,
+      startLat,
+      startLng,
+      endLat,
+      endLng,
+    } = req.body;
 
     const route = await prisma.route.update({
       where: { id },
-      data: { name, startPoint, endPoint },
+      data: {
+        name,
+        startPoint,
+        endPoint,
+        startLat: parseCoordinate(startLat),
+        startLng: parseCoordinate(startLng),
+        endLat: parseCoordinate(endLat),
+        endLng: parseCoordinate(endLng),
+      },
     });
 
     res.json(route);
