@@ -1,102 +1,91 @@
-const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
+/**
+ * Bus Controller
+ * HTTP handlers for bus/fleet management endpoints
+ * Uses bus.service for business logic
+ */
 
-const hasActiveMaintenanceTicket = async (busId) => {
-  const ticket = await prisma.maintenanceTicket.findFirst({
-    where: {
-      busId,
-      status: { in: ["OPEN", "ENROUTE"] },
-    },
+const { asyncHandler } = require("../utils/errorHandler");
+const busService = require("./bus.service");
+const logger = require("../utils/logger");
+
+/**
+ * Create a new bus
+ * POST /buses
+ */
+exports.createBus = asyncHandler(async (req, res) => {
+  logger.info(`Creating new bus: ${req.validated.plateNumber}`);
+  const bus = await busService.createBus(req.validated);
+  res.status(201).json({
+    message: "Bus created successfully",
+    bus,
   });
+});
 
-  return Boolean(ticket);
-};
+/**
+ * Get all buses
+ * GET /buses
+ */
+exports.getBuses = asyncHandler(async (req, res) => {
+  logger.info("Fetching all buses");
+  const buses = await busService.getAllBuses();
+  res.json(buses);
+});
 
-// CREATE bus
-exports.createBus = async (req, res) => {
-  try {
-    const { plateNumber, model, routeId } = req.body;
+/**
+ * Get a specific bus
+ * GET /buses/:id
+ */
+exports.getBusById = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  logger.info(`Fetching bus: ${id}`);
+  const bus = await busService.getBusById(id);
+  res.json(bus);
+});
 
-    const bus = await prisma.bus.create({
-      data: {
-        plateNumber,
-        model,
-        routeId,
-        status: "STANDBY",
-      },
-    });
+/**
+ * Update a bus
+ * PUT /buses/:id
+ */
+exports.updateBus = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  logger.info(`Updating bus: ${id}`);
+  const bus = await busService.updateBus(id, req.validated);
+  res.json({
+    message: "Bus updated successfully",
+    bus,
+  });
+});
 
-    res.status(201).json({
-      message: "Bus created successfully",
-      bus,
-    });
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-};
+/**
+ * Delete a bus
+ * DELETE /buses/:id
+ */
+exports.deleteBus = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  logger.info(`Deleting bus: ${id}`);
+  const result = await busService.deleteBus(id);
+  res.json(result);
+});
 
-// GET all buses
-exports.getBuses = async (req, res) => {
-  try {
-    const buses = await prisma.bus.findMany({
-      include: { route: true },
-    });
+/**
+ * Get buses by route
+ * GET /buses/route/:routeId
+ */
+exports.getBusesByRoute = asyncHandler(async (req, res) => {
+  const { routeId } = req.params;
+  logger.info(`Fetching buses for route: ${routeId}`);
+  const buses = await busService.getBusesByRoute(routeId);
+  res.json(buses);
+});
 
-    const busesWithMaintenanceFlag = await Promise.all(
-      buses.map(async (bus) => ({
-        ...bus,
-        isUnderRepair: await hasActiveMaintenanceTicket(bus.id),
-        status: (await hasActiveMaintenanceTicket(bus.id)) ? "INACTIVE" : bus.status,
-      })),
-    );
-
-    res.json(busesWithMaintenanceFlag);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-};
-
-// UPDATE bus
-exports.updateBus = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { plateNumber, model, routeId, status } = req.body;
-
-    const underRepair = await hasActiveMaintenanceTicket(id);
-
-    if (underRepair && status && status !== "INACTIVE") {
-      return res.status(409).json({
-        error: "Bus remains inactive while repair is in progress. Resolve maintenance before changing status.",
-      });
-    }
-
-    const bus = await prisma.bus.update({
-      where: { id },
-      data: {
-        plateNumber,
-        model,
-        routeId,
-        status: underRepair ? "INACTIVE" : status,
-      },
-    });
-
-    res.json(bus);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-};
-
-// DELETE bus
-exports.deleteBus = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    await prisma.bus.delete({
-      where: { id },
-    });
-
-    res.json({ message: "Bus deleted" });
-  } catch (error) {
-    res.status(400).json({ error: error.message });
+/**
+ * Get buses by status
+ * GET /buses/status/:status
+ */
+exports.getBusesByStatus = asyncHandler(async (req, res) => {
+  const { status } = req.params;
+  logger.info(`Fetching buses with status: ${status}`);
+  const buses = await busService.getBusesByStatus(status);
+  res.json(buses);
   }
 };

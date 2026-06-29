@@ -1,6 +1,11 @@
 // Core Express dependencies
 const express = require("express");
 const cors = require("cors");
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
+
+// Import error handling utilities
+const { errorHandler } = require("./utils/errorHandler");
 
 // Import all route modules for different business domains
 const authRoutes = require("./auth/auth.routes");
@@ -16,11 +21,43 @@ const trackingRoutes = require("./tracking/tracking.routes");
 // Create Express application instance
 const app = express();
 
-// Enable Cross-Origin Resource Sharing (CORS) for frontend communication
-app.use(cors());
+// Security: Add HTTP security headers with helmet
+app.use(helmet());
 
-// Middleware to parse incoming JSON request bodies
-app.use(express.json());
+// Security: Configure CORS with origin whitelist
+const corsOrigins = process.env.CORS_ORIGINS
+  ? process.env.CORS_ORIGINS.split(",")
+  : ["http://localhost:3000", "http://localhost:5173"];
+
+app.use(
+  cors({
+    origin: corsOrigins,
+    credentials: process.env.CORS_CREDENTIALS === "true",
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  }),
+);
+
+// Security: Limit request payload size
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ limit: "10mb", extended: true }));
+
+// Security: Rate limiting middleware
+const limiter = rateLimit({
+  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || "900000"), // 15 minutes
+  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || "100"),
+  message: "Too many requests from this IP, please try again later.",
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.use("/auth", limiter); // Stricter rate limiting for auth endpoints
+app.use("/", (req, res, next) => {
+  if (!req.path.startsWith("/auth")) {
+    return limiter(req, res, next);
+  }
+  next();
+});
 
 // Mount authentication endpoints (/auth)
 console.log("✅ Mounting /auth routes");
@@ -55,13 +92,32 @@ console.log("✅ Mounting /reports routes");
 app.use("/reports", reportRoutes);
 
 // Mount real-time driver tracking endpoints (/tracking)
-console.log("Mounting /tracking routes");
+console.log("✅ Mounting /tracking routes");
 app.use("/tracking", trackingRoutes);
 
 // Health check endpoint - confirms API is running
 app.get("/", (req, res) => {
-  res.send("Track23 backend is running 🚍");
+  res.json({
+    status: "running",
+    service: "Track23 Backend",
+    timestamp: new Date().toISOString(),
+  });
 });
+
+// 404 handler - must be before error handler
+app.use((req, res) => {
+  res.status(404).json({
+    error: {
+      code: "NOT_FOUND",
+      message: `Route ${req.method} ${req.path} not found`,
+      statusCode: 404,
+      timestamp: new Date().toISOString(),
+    },
+  });
+});
+
+// Centralized error handling middleware (must be last)
+app.use(errorHandler);
 
 // Export the configured Express app for server.js to use
 module.exports = app;

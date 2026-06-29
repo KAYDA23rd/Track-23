@@ -1,0 +1,53 @@
+# Docker Compose for Track23 Development
+version: "3.8"
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: track23-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: track23
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    container_name: track23-backend
+    environment:
+      DATABASE_URL: mysql://root:root@mysql:3306/track23
+      JWT_SECRET: dev_secret_key_change_in_production
+      PORT: 4000
+      NODE_ENV: development
+    ports:
+      - "4000:4000"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    command: npm run dev
+
+  frontend:
+    build: ./frontend
+    container_name: track23-frontend
+    environment:
+      REACT_APP_API_URL: http://localhost:4000
+    ports:
+      - "3000:5173"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+volumes:
+  mysql_data:

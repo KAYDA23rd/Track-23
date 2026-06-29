@@ -1,5 +1,6 @@
 // JWT library for token verification
 const jwt = require("jsonwebtoken");
+const { unauthorizedError } = require("../utils/errorHandler");
 
 /**
  * Middleware: Extract and verify JWT token from Authorization header
@@ -13,7 +14,7 @@ module.exports = (req, res, next) => {
 
     // Check for missing or malformed Authorization header
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ error: "Not authorized" });
+      throw unauthorizedError("Missing or invalid authorization header");
     }
 
     // Extract token from "Bearer <token>" format
@@ -29,6 +30,6 @@ module.exports = (req, res, next) => {
     next();
   } catch (err) {
     // Return 401 if token is invalid, expired, or tampered with.
-    return res.status(401).json({ error: "Invalid or expired token" });
+    throw unauthorizedError(err.message || "Invalid or expired token");
   }
 };
