@@ -1,3 +1,6 @@
+// Leaflet asset fix for Vite builds.
+// Ensures default marker icons resolve correctly when the
+// React app bundles map assets for development and production.
 import L from 'leaflet';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';

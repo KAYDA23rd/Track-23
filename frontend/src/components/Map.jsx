@@ -1,3 +1,5 @@
+// Lightweight map component used for route visualization.
+// Focuses on the launch corridor between Iyana-Iba and Egbeda.
 import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
 
@@ -83,3 +85,4 @@ export default function Map() {
     </MapContainer>
   );
 }
+

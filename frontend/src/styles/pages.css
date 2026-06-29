@@ -1,3 +1,6 @@
+/* Shared admin page styles.
+   Covers panels, tables, form controls, action buttons, and
+   reusable layout blocks across management pages. */
 .page-shell {
   display: grid;
   gap: 16px;
@@ -171,6 +174,12 @@
 .row-actions {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
+}
+
+.stack-sm {
+  display: grid;
+  gap: 6px;
 }
 
 .badge {
@@ -337,3 +346,4 @@
     min-width: 560px;
   }
 }
+

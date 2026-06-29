@@ -1,7 +1,11 @@
+// Admin login screen.
+// Restricts this portal to admin-level roles and routes
+// successful sessions into the management console.
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../api/api";
 import "../styles/login.css";
+import { setToken } from "../utils/authSession";
 
 export default function Login() {
   const [phone, setPhone] = useState("");
@@ -16,10 +20,14 @@ export default function Login() {
       const res = await api.post("/auth/login", { phone, password });
       const role = res.data?.user?.role;
       if (role !== "ADMIN" && role !== "SUPER_ADMIN") {
-        setError("Use the Driver Portal for driver accounts.");
+        setError(
+          role === "MECHANIC"
+            ? "Use the Mechanic Portal for mechanic accounts."
+            : "Use the Driver Portal for driver accounts.",
+        );
         return;
       }
-      localStorage.setItem("token", res.data.token);
+      setToken(res.data.token);
       window.location.href = "/dashboard";
     } catch {
       setError("Invalid login details");
@@ -63,3 +71,4 @@ export default function Login() {
     </div>
   );
 }
+

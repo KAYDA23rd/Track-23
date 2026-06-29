@@ -1,3 +1,6 @@
+// Route planning page.
+// Maintains corridor definitions, mapped endpoints, and
+// route planning assumptions for dispatch operations.
 import { useEffect, useMemo, useState } from "react";
 import {
   MapContainer,
@@ -24,6 +27,12 @@ const emptyDraft = {
   startLng: "",
   endLat: "",
   endLng: "",
+  plannedDistanceKm: "",
+  targetDurationMinutes: "",
+  turnaroundMinutes: "",
+  plannedTripsPerShift: "",
+  peakHeadwayMinutes: "",
+  offPeakHeadwayMinutes: "",
 };
 
 const toPayload = (route) => ({
@@ -34,6 +43,15 @@ const toPayload = (route) => ({
   startLng: route.startLng === "" ? null : Number(route.startLng),
   endLat: route.endLat === "" ? null : Number(route.endLat),
   endLng: route.endLng === "" ? null : Number(route.endLng),
+  plannedDistanceKm: route.plannedDistanceKm === "" ? null : Number(route.plannedDistanceKm),
+  targetDurationMinutes:
+    route.targetDurationMinutes === "" ? null : Number(route.targetDurationMinutes),
+  turnaroundMinutes: route.turnaroundMinutes === "" ? null : Number(route.turnaroundMinutes),
+  plannedTripsPerShift:
+    route.plannedTripsPerShift === "" ? null : Number(route.plannedTripsPerShift),
+  peakHeadwayMinutes: route.peakHeadwayMinutes === "" ? null : Number(route.peakHeadwayMinutes),
+  offPeakHeadwayMinutes:
+    route.offPeakHeadwayMinutes === "" ? null : Number(route.offPeakHeadwayMinutes),
 });
 
 const coordText = (lat, lng) => {
@@ -279,6 +297,12 @@ export default function RoutesPage() {
       endPoint: IYANA_IBA_BUS_STOP.name,
       endLat: IYANA_IBA_BUS_STOP.lat,
       endLng: IYANA_IBA_BUS_STOP.lng,
+      plannedDistanceKm: prev.plannedDistanceKm || "19.6",
+      targetDurationMinutes: prev.targetDurationMinutes || "55",
+      turnaroundMinutes: prev.turnaroundMinutes || "15",
+      plannedTripsPerShift: prev.plannedTripsPerShift || "6",
+      peakHeadwayMinutes: prev.peakHeadwayMinutes || "12",
+      offPeakHeadwayMinutes: prev.offPeakHeadwayMinutes || "20",
     }));
     setStartOptions([]);
     setEndOptions([]);
@@ -334,6 +358,12 @@ export default function RoutesPage() {
       startLng: route.startLng ?? "",
       endLat: route.endLat ?? "",
       endLng: route.endLng ?? "",
+      plannedDistanceKm: route.plannedDistanceKm ?? "",
+      targetDurationMinutes: route.targetDurationMinutes ?? "",
+      turnaroundMinutes: route.turnaroundMinutes ?? "",
+      plannedTripsPerShift: route.plannedTripsPerShift ?? "",
+      peakHeadwayMinutes: route.peakHeadwayMinutes ?? "",
+      offPeakHeadwayMinutes: route.offPeakHeadwayMinutes ?? "",
     });
     setPinTarget("start");
   };
@@ -397,6 +427,63 @@ export default function RoutesPage() {
               onTargetPin={() => setPinTarget("end")}
               options={endOptions}
               value={draft.endPoint}
+            />
+          </div>
+
+          <div className="form-grid">
+            <input
+              className="field"
+              min="0"
+              onChange={(e) => setDraft((prev) => ({ ...prev, plannedDistanceKm: e.target.value }))}
+              placeholder="Planned distance (km)"
+              step="0.1"
+              type="number"
+              value={draft.plannedDistanceKm}
+            />
+
+            <input
+              className="field"
+              min="0"
+              onChange={(e) => setDraft((prev) => ({ ...prev, targetDurationMinutes: e.target.value }))}
+              placeholder="Target duration (mins)"
+              type="number"
+              value={draft.targetDurationMinutes}
+            />
+
+            <input
+              className="field"
+              min="0"
+              onChange={(e) => setDraft((prev) => ({ ...prev, turnaroundMinutes: e.target.value }))}
+              placeholder="Turnaround (mins)"
+              type="number"
+              value={draft.turnaroundMinutes}
+            />
+
+            <input
+              className="field"
+              min="0"
+              onChange={(e) => setDraft((prev) => ({ ...prev, plannedTripsPerShift: e.target.value }))}
+              placeholder="Planned trips / shift"
+              type="number"
+              value={draft.plannedTripsPerShift}
+            />
+
+            <input
+              className="field"
+              min="0"
+              onChange={(e) => setDraft((prev) => ({ ...prev, peakHeadwayMinutes: e.target.value }))}
+              placeholder="Peak headway (mins)"
+              type="number"
+              value={draft.peakHeadwayMinutes}
+            />
+
+            <input
+              className="field"
+              min="0"
+              onChange={(e) => setDraft((prev) => ({ ...prev, offPeakHeadwayMinutes: e.target.value }))}
+              placeholder="Off-peak headway (mins)"
+              type="number"
+              value={draft.offPeakHeadwayMinutes}
             />
           </div>
 
@@ -476,6 +563,7 @@ export default function RoutesPage() {
                 <th>End</th>
                 <th>Start Coords</th>
                 <th>End Coords</th>
+                <th>Ops Target</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -487,6 +575,17 @@ export default function RoutesPage() {
                   <td>{route.endPoint}</td>
                   <td>{coordText(route.startLat, route.startLng)}</td>
                   <td>{coordText(route.endLat, route.endLng)}</td>
+                  <td>
+                    <div className="stack-sm">
+                      <span>{route.plannedDistanceKm ? `${route.plannedDistanceKm} km` : "No distance set"}</span>
+                      <span>
+                        {route.targetDurationMinutes ? `${route.targetDurationMinutes} mins` : "No duration set"}
+                      </span>
+                      <span>
+                        {route.plannedTripsPerShift ? `${route.plannedTripsPerShift} trips / shift` : "No trip target"}
+                      </span>
+                    </div>
+                  </td>
                   <td>
                     <div className="row-actions">
                       <button className="btn btn-neutral" onClick={() => editRoute(route)} type="button">
@@ -508,3 +607,4 @@ export default function RoutesPage() {
     </div>
   );
 }
+

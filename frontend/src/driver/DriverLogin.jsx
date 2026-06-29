@@ -1,18 +1,11 @@
+// Driver login and self-signup screen.
+// Supports driver onboarding with admin approval before
+// the account can access the mobile driver console.
 import { useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import api from "../api/api";
 import "../styles/driver.css";
-
-const decodeRole = (token) => {
-  try {
-    const [, payload] = token.split(".");
-    if (!payload) return null;
-    const parsed = JSON.parse(atob(payload));
-    return parsed.role || null;
-  } catch {
-    return null;
-  }
-};
+import { decodeRole, getToken, setDriverProfile, setToken } from "../utils/authSession";
 
 export default function DriverLogin() {
   const [mode, setMode] = useState("login");
@@ -25,7 +18,7 @@ export default function DriverLogin() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
-  const existingToken = localStorage.getItem("token");
+  const existingToken = getToken();
   if (existingToken && decodeRole(existingToken) === "DRIVER") {
     return <Navigate replace to="/driver/app" />;
   }
@@ -45,9 +38,11 @@ export default function DriverLogin() {
         return;
       }
 
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("driver_phone", phone);
-      localStorage.setItem("driver_name", res.data.user?.name || "Track23 Driver");
+      setToken(res.data.token);
+      setDriverProfile({
+        phone,
+        name: res.data.user?.name || "Track23 Driver",
+      });
       navigate("/driver/app");
     } catch (err) {
       const message = err?.response?.data?.error || "Invalid login details.";
@@ -182,3 +177,4 @@ export default function DriverLogin() {
     </div>
   );
 }
+

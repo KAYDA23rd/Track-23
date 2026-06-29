@@ -1,3 +1,6 @@
+/* Route planner styles.
+   Covers route setup forms, geo lookup controls, planner
+   metadata, and route-map display sections. */
 .route-workspace {
   display: grid;
   grid-template-columns: minmax(340px, 420px) minmax(0, 1fr);
@@ -67,3 +70,4 @@
     grid-template-columns: 1fr;
   }
 }
+

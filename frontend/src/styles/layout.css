@@ -1,3 +1,6 @@
+/* Shared layout styles.
+   Covers the sidebar shell, content frame, mobile drawer,
+   and shared responsive app structure. */
 .app-shell {
   min-height: 100vh;
   background: radial-gradient(circle at 10% 0%, #e9f7f1 0%, #eef2f8 34%, #f5f7fb 100%);
@@ -12,6 +15,8 @@
   padding: 28px 20px;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   background: linear-gradient(165deg, #0a1822 0%, #102937 55%, #103848 100%);
   color: #f4f8fb;
   box-shadow: 6px 0 28px rgba(9, 17, 26, 0.28);
@@ -87,6 +92,7 @@
   margin-top: 18px;
   display: grid;
   gap: 8px;
+  padding-bottom: 16px;
 }
 
 .sidebar-link {
@@ -137,6 +143,7 @@
 
 .sidebar-logout {
   margin-top: auto;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -149,6 +156,23 @@
   cursor: pointer;
   text-align: left;
   transition: background-color 0.16s ease, transform 0.12s ease, border-color 0.16s ease;
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .sidebar-logout:hover {
@@ -214,23 +238,26 @@
   margin-left: 92px;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
   .app-content {
     margin-left: 0;
-    padding: 12px;
+    padding: 14px;
   }
 
   .sidebar {
-    width: min(84vw, 320px);
-    padding: 16px 12px;
+    width: min(92vw, 360px);
+    max-width: 360px;
+    padding: 18px 14px;
     transform: translateX(0);
     transition: transform 0.24s ease, width 0.2s ease, padding 0.2s ease;
+    box-shadow: 18px 0 42px rgba(9, 17, 26, 0.34);
   }
 
   .app-shell.sidebar-collapsed .sidebar {
-    width: min(84vw, 320px);
+    width: min(92vw, 360px);
+    max-width: 360px;
     transform: translateX(-110%);
-    padding: 16px 12px;
+    padding: 18px 14px;
   }
 
   .app-shell.sidebar-collapsed .sidebar-link-label,
@@ -257,15 +284,25 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 76px;
-    min-height: 40px;
-    border: 1px solid #c5d4e0;
-    border-radius: 10px;
-    background: #ffffff;
+    width: 42px;
+    height: 42px;
+    border: 1px solid #b8cad7;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.94);
     color: #173949;
-    padding: 8px 12px;
-    font-weight: 700;
+    padding: 9px;
     cursor: pointer;
+    box-shadow: 0 10px 24px rgba(15, 39, 58, 0.08);
+  }
+
+  .mobile-sidebar-trigger svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
 
   .mobile-topbar {
@@ -273,8 +310,8 @@
     align-items: center;
     justify-content: space-between;
     gap: 10px;
-    margin: 0 0 12px;
-    padding: 6px 0;
+    margin: 0 0 16px;
+    padding: 4px 0 2px;
   }
 
   .mobile-brand {
@@ -291,11 +328,125 @@
     border: none;
     padding: 0;
     margin: 0;
-    background: rgba(9, 17, 26, 0.46);
+    background: rgba(9, 17, 26, 0.58);
+    backdrop-filter: blur(3px);
     z-index: 110;
   }
 
   .mobile-nav-open .app-content {
     pointer-events: none;
+    user-select: none;
   }
 }
+
+@media (max-width: 640px) {
+  .app-content {
+    padding: 12px;
+  }
+
+  .sidebar {
+    width: 100vw;
+    max-width: none;
+    padding: 18px 12px;
+  }
+
+  .app-shell.sidebar-collapsed .sidebar {
+    width: 100vw;
+    max-width: none;
+    padding: 18px 12px;
+  }
+
+  .mobile-topbar {
+    margin-bottom: 14px;
+  }
+}
+
+/* Modern control-room refresh */
+.app-shell {
+  position: relative;
+  isolation: isolate;
+  background:
+    linear-gradient(120deg, rgba(36, 199, 183, 0.1), transparent 30%),
+    linear-gradient(250deg, rgba(47, 140, 255, 0.08), transparent 32%),
+    #eef4f6;
+}
+
+.app-shell::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(14, 44, 60, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(14, 44, 60, 0.04) 1px, transparent 1px);
+  background-size: 34px 34px;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.75), transparent 82%);
+}
+
+.sidebar {
+  background:
+    linear-gradient(180deg, rgba(12, 29, 39, 0.94), rgba(6, 19, 28, 0.98)),
+    linear-gradient(135deg, rgba(36, 199, 183, 0.18), rgba(255, 184, 77, 0.08));
+  border-right: 1px solid rgba(129, 183, 200, 0.2);
+  box-shadow: 14px 0 42px rgba(6, 20, 30, 0.24);
+}
+
+.sidebar-brand {
+  border-bottom-color: rgba(143, 188, 207, 0.18);
+}
+
+.sidebar-logo-link h1 {
+  letter-spacing: 0;
+}
+
+.sidebar-brand-meta {
+  color: rgba(218, 236, 242, 0.68);
+}
+
+.sidebar-toggle,
+.sidebar-link-icon {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(183, 223, 230, 0.18);
+}
+
+.sidebar-link {
+  color: rgba(232, 244, 248, 0.82);
+  border: 1px solid transparent;
+}
+
+.sidebar-link:hover {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(164, 214, 224, 0.16);
+}
+
+.sidebar-link.is-active {
+  color: #ffffff;
+  background:
+    linear-gradient(135deg, rgba(36, 199, 183, 0.96), rgba(23, 185, 120, 0.95)),
+    #17b978;
+  box-shadow: 0 12px 26px rgba(23, 185, 120, 0.26);
+}
+
+.sidebar-logout {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(183, 223, 230, 0.18);
+}
+
+.app-content {
+  min-height: 100vh;
+}
+
+.mobile-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  backdrop-filter: blur(18px);
+}
+
+.mobile-sidebar-trigger {
+  border-color: rgba(69, 112, 135, 0.22);
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 14px 30px rgba(15, 35, 52, 0.12);
+}
+

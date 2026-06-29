@@ -1,13 +1,34 @@
+/* Dashboard styles.
+   Covers the admin control-room layout, KPI cards, route map
+   sections, and responsive dashboard composition. */
 .dashboard {
   display: grid;
   gap: 18px;
 }
 
-.dashboard-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 14px;
+.dashboard-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.9fr);
+  gap: 16px;
+  align-items: stretch;
+}
+
+.dashboard-hero-copy,
+.dashboard-hero-meta,
+.kpi-card,
+.insight-panel,
+.map-panel {
+  background: #ffffff;
+  border-radius: 18px;
+  border: 1px solid #dce7f0;
+  box-shadow: 0 10px 24px rgba(17, 34, 51, 0.06);
+}
+
+.dashboard-hero-copy {
+  padding: 22px;
+  background:
+    radial-gradient(circle at top right, rgba(29, 163, 116, 0.14), transparent 32%),
+    linear-gradient(160deg, #ffffff 0%, #f5fbf8 100%);
 }
 
 .dashboard-kicker {
@@ -20,23 +41,44 @@
 }
 
 .dashboard h1 {
-  margin: 4px 0 6px;
-  font-size: 2rem;
+  margin: 6px 0 10px;
+  font-size: clamp(1.9rem, 3vw, 2.5rem);
   color: #0f2432;
+  line-height: 1.05;
 }
 
 .dashboard-subtitle {
   margin: 0;
   color: #526476;
+  max-width: 62ch;
 }
 
-.dashboard-date {
-  padding: 10px 14px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(23, 52, 66, 0.12);
-  color: #173949;
-  font-weight: 600;
+.dashboard-hero-meta {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+
+.dashboard-date-card,
+.dashboard-health-card {
+  border-radius: 14px;
+  padding: 16px;
+  background: linear-gradient(180deg, #f7fbff 0%, #edf5fb 100%);
+  border: 1px solid #d7e6f1;
+}
+
+.dashboard-date-card span,
+.dashboard-health-card span {
+  display: block;
+  color: #5f7385;
+  font-size: 0.78rem;
+  margin-bottom: 6px;
+}
+
+.dashboard-date-card strong,
+.dashboard-health-card strong {
+  color: #143245;
+  font-size: 1rem;
 }
 
 .kpi-grid {
@@ -46,11 +88,7 @@
 }
 
 .kpi-card {
-  background: #ffffff;
-  border-radius: 14px;
   padding: 16px;
-  border: 1px solid #dde6ef;
-  box-shadow: 0 8px 18px rgba(20, 36, 52, 0.06);
 }
 
 .kpi-label {
@@ -78,30 +116,76 @@
   color: #d93042;
 }
 
-.insight-grid {
+.dashboard-main-grid {
   display: grid;
-  grid-template-columns: 1.5fr 1fr;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 14px;
+}
+
+.dashboard-lower-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(320px, 0.8fr);
   gap: 14px;
 }
 
 .insight-panel {
-  background: #ffffff;
-  border-radius: 14px;
   padding: 16px;
-  border: 1px solid #dde6ef;
-  box-shadow: 0 8px 18px rgba(20, 36, 52, 0.05);
 }
 
-.insight-panel h3 {
-  margin: 0 0 10px;
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.panel-head h3 {
+  margin: 0;
   color: #132d40;
+}
+
+.panel-chip {
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: #eef7f2;
+  border: 1px solid #cfe8dc;
+  color: #167d5c;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.dispatch-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.dispatch-stat-card {
+  border-radius: 14px;
+  padding: 14px;
+  background: linear-gradient(180deg, #f8fbfd 0%, #eef5fb 100%);
+  border: 1px solid #dde8f1;
+}
+
+.dispatch-stat-card span {
+  display: block;
+  color: #607384;
+  font-size: 0.8rem;
+  margin-bottom: 6px;
+}
+
+.dispatch-stat-card strong {
+  color: #12283a;
+  font-size: 1.4rem;
 }
 
 .snapshot-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 0;
+  gap: 12px;
+  padding: 12px 0;
   border-top: 1px dashed #d9e2ec;
   font-size: 0.95rem;
 }
@@ -111,11 +195,7 @@
 }
 
 .map-panel {
-  background: #ffffff;
-  border-radius: 16px;
   padding: 14px;
-  border: 1px solid #d8e3ee;
-  box-shadow: 0 12px 22px rgba(20, 36, 52, 0.07);
 }
 
 .map-header {
@@ -133,74 +213,95 @@
   font-size: 0.9rem;
 }
 
-.route-filter-bar {
-  margin-top: 10px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.route-chip {
-  border: 1px solid #cfdbe7;
-  border-radius: 999px;
-  padding: 6px 12px;
-  background: #f6f9fc;
-  color: #224359;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 0.78rem;
-  transition: all 0.15s ease;
-}
-
-.route-chip:hover {
-  background: #e9f1f8;
-  border-color: #b9cfdf;
-}
-
-.route-chip.is-selected {
-  background: linear-gradient(135deg, #0f9b6d 0%, #17b884 100%);
-  color: #ffffff;
-  border-color: rgba(14, 121, 86, 0.5);
-}
-
 .map-panel .leaflet-container {
-  border-radius: 12px;
+  border-radius: 14px;
   overflow: hidden;
 }
 
+.dashboard-list {
+  display: grid;
+  gap: 10px;
+}
+
+.dashboard-list-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px;
+  border-radius: 14px;
+  background: #f7fafc;
+  border: 1px solid #e1ebf3;
+}
+
+.dashboard-list-item strong {
+  color: #153449;
+}
+
+.dashboard-list-item p {
+  margin: 4px 0 0;
+  color: #607384;
+  font-size: 0.82rem;
+}
+
+.dashboard-list-meta {
+  text-align: right;
+}
+
 @media (max-width: 1200px) {
-  .kpi-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .dashboard-hero,
+  .dashboard-main-grid,
+  .dashboard-lower-grid {
+    grid-template-columns: 1fr;
   }
 
-  .insight-grid {
-    grid-template-columns: 1fr;
+  .kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 700px) {
-  .dashboard-header {
-    flex-direction: column;
+  .dashboard {
+    gap: 14px;
   }
 
-  .dashboard-date {
-    width: 100%;
-    text-align: center;
+  .dashboard-hero-copy,
+  .dashboard-hero-meta,
+  .kpi-card,
+  .insight-panel,
+  .map-panel {
+    border-radius: 14px;
   }
 
-  .kpi-grid {
-    grid-template-columns: 1fr;
+  .dashboard-hero-copy,
+  .dashboard-hero-meta,
+  .kpi-card,
+  .insight-panel {
+    padding: 14px;
   }
 
   .dashboard h1 {
-    font-size: 1.6rem;
+    font-size: 1.75rem;
   }
 
-  .kpi-card {
-    padding: 14px;
+  .kpi-grid,
+  .dispatch-stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .panel-head,
+  .dashboard-list-item,
+  .snapshot-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .dashboard-list-meta {
+    text-align: left;
   }
 
   .map-panel {
     padding: 10px;
   }
 }
+

@@ -3,7 +3,7 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const LIVE_WINDOW_MINUTES = 15;
 
-const resolveAssignedBusId = async (userId) => {
+const resolveAssignedShift = async (userId) => {
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { phone: true },
@@ -23,19 +23,23 @@ const resolveAssignedBusId = async (userId) => {
       driverId: driver.id,
       startTime: { lte: now },
       endTime: { gte: now },
+      status: { in: ["HANDED_OVER", "ON_ROUTE", "COMPLETED"] },
     },
     orderBy: { startTime: "desc" },
-    select: { busId: true },
+    select: { id: true, busId: true, status: true },
   });
-  if (activeShift?.busId) return activeShift.busId;
+  if (activeShift?.busId) return activeShift;
 
   const latestShift = await prisma.shift.findFirst({
-    where: { driverId: driver.id },
+    where: {
+      driverId: driver.id,
+      status: { in: ["ASSIGNED", "HANDED_OVER", "ON_ROUTE", "COMPLETED"] },
+    },
     orderBy: { startTime: "desc" },
-    select: { busId: true },
+    select: { id: true, busId: true, status: true },
   });
 
-  return latestShift?.busId || null;
+  return latestShift || null;
 };
 
 exports.upsertDriverLocation = async (req, res) => {
@@ -46,7 +50,8 @@ exports.upsertDriverLocation = async (req, res) => {
       return res.status(400).json({ error: "lat and lng are required numbers" });
     }
 
-    const assignedBusId = await resolveAssignedBusId(req.user.id);
+    const assignedShift = await resolveAssignedShift(req.user.id);
+    const assignedBusId = assignedShift?.busId || null;
 
     const location = await prisma.driverLocation.upsert({
       where: { userId: req.user.id },
@@ -73,6 +78,7 @@ exports.upsertDriverLocation = async (req, res) => {
     res.json({
       message: "Location updated",
       assignedBusId,
+      assignedShiftId: assignedShift?.id || null,
       location,
     });
   } catch (error) {
@@ -103,7 +109,22 @@ exports.getLiveDriverLocations = async (req, res) => {
       },
     });
 
-    res.json(locations);
+    const busIds = [...new Set(locations.map((location) => location.busId).filter(Boolean))];
+    const buses = busIds.length
+      ? await prisma.bus.findMany({
+          where: { id: { in: busIds } },
+          include: { route: true },
+        })
+      : [];
+    const busById = new Map(buses.map((bus) => [bus.id, bus]));
+
+    res.json(
+      locations.map((location) => ({
+        ...location,
+        bus: location.busId ? busById.get(location.busId) || null : null,
+        isOfflineRisk: location.recordedAt < cutoff,
+      })),
+    );
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

@@ -1,23 +1,19 @@
+// Driver administration page.
+// Used to approve driver accounts, manage statuses, and
+// monitor driver records inside the admin console.
 import { useEffect, useMemo, useState } from "react";
 import api from "../api/api";
 import "../styles/pages.css";
+import { decodeRole } from "../utils/authSession";
 
 const decodeRoleFromToken = () => {
-  try {
-    const token = localStorage.getItem("token");
-    if (!token) return null;
-    const [, payload] = token.split(".");
-    if (!payload) return null;
-    const parsed = JSON.parse(atob(payload));
-    return parsed.role || null;
-  } catch {
-    return null;
-  }
+  return decodeRole();
 };
 
 export default function DriversPage() {
   const [drivers, setDrivers] = useState([]);
   const [pendingUsers, setPendingUsers] = useState([]);
+  const [driverAccounts, setDriverAccounts] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState({ name: "", phone: "", licenseNo: "" });
   const [newDriver, setNewDriver] = useState({ name: "", phone: "", licenseNo: "" });
@@ -46,6 +42,20 @@ export default function DriversPage() {
     }
   };
 
+  const loadDriverAccounts = async () => {
+    if (!isStaffAdmin) {
+      setDriverAccounts([]);
+      return;
+    }
+
+    try {
+      const res = await api.get("/auth/drivers");
+      setDriverAccounts(res.data);
+    } catch {
+      setDriverAccounts([]);
+    }
+  };
+
   useEffect(() => {
     const init = async () => {
       const driversRes = await api.get("/drivers");
@@ -57,6 +67,13 @@ export default function DriversPage() {
           setPendingUsers(pendingRes.data);
         } catch {
           setPendingUsers([]);
+        }
+
+        try {
+          const accountsRes = await api.get("/auth/drivers");
+          setDriverAccounts(accountsRes.data);
+        } catch {
+          setDriverAccounts([]);
         }
       }
     };
@@ -105,6 +122,12 @@ export default function DriversPage() {
   const approveDriverAccount = async (userId) => {
     await api.put(`/auth/drivers/${userId}/approve`);
     loadPendingUsers();
+    loadDriverAccounts();
+  };
+
+  const setDriverStatus = async (userId, isActive) => {
+    await api.put(`/auth/drivers/${userId}/status`, { isActive });
+    await loadDriverAccounts();
   };
 
   return (
@@ -198,6 +221,52 @@ export default function DriversPage() {
             </div>
           ) : (
             <p className="empty-state">No pending driver accounts.</p>
+          )}
+        </section>
+      )}
+
+      {isStaffAdmin && (
+        <section className="panel">
+          <h3>Driver Account Control</h3>
+          {driverAccounts.length > 0 ? (
+            <div className="table-wrap">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th>Status</th>
+                    <th>Approved</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {driverAccounts.map((user) => (
+                    <tr key={user.id}>
+                      <td>{user.name}</td>
+                      <td>{user.phone}</td>
+                      <td>
+                        <span className={`badge ${user.isActive ? "active" : "standby"}`}>
+                          {user.isActive ? "ACTIVE" : "SUSPENDED"}
+                        </span>
+                      </td>
+                      <td>{user.approvedAt ? new Date(user.approvedAt).toLocaleDateString() : "-"}</td>
+                      <td>
+                        <button
+                          className={`btn ${user.isActive ? "btn-danger" : "btn-primary"}`}
+                          onClick={() => setDriverStatus(user.id, !user.isActive)}
+                          type="button"
+                        >
+                          {user.isActive ? "Suspend" : "Activate"}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="empty-state">No driver accounts found.</p>
           )}
         </section>
       )}
@@ -311,3 +380,4 @@ export default function DriversPage() {
     </div>
   );
 }
+

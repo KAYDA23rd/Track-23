@@ -1,3 +1,6 @@
+// Fleet management page.
+// Handles bus creation, status changes, service readiness,
+// and maintenance-aware fleet controls.
 import { useEffect, useState } from "react";
 import api from "../api/api";
 import "../styles/pages.css";
@@ -5,6 +8,7 @@ import "../styles/pages.css";
 export default function BusesPage() {
   const [buses, setBuses] = useState([]);
   const [routes, setRoutes] = useState([]);
+  const [tickets, setTickets] = useState([]);
 
   const [plateNumber, setPlateNumber] = useState("");
   const [model, setModel] = useState("");
@@ -19,23 +23,27 @@ export default function BusesPage() {
   });
 
   const loadData = async () => {
-    const [busesRes, routesRes] = await Promise.all([
+    const [busesRes, routesRes, ticketsRes] = await Promise.all([
       api.get("/buses"),
       api.get("/routes"),
+      api.get("/maintenance"),
     ]);
 
     setBuses(busesRes.data);
     setRoutes(routesRes.data);
+    setTickets(ticketsRes.data);
   };
 
   useEffect(() => {
     const init = async () => {
-      const [busesRes, routesRes] = await Promise.all([
+      const [busesRes, routesRes, ticketsRes] = await Promise.all([
         api.get("/buses"),
         api.get("/routes"),
+        api.get("/maintenance"),
       ]);
       setBuses(busesRes.data);
       setRoutes(routesRes.data);
+      setTickets(ticketsRes.data);
     };
 
     init();
@@ -82,9 +90,11 @@ export default function BusesPage() {
 
   const statusClass = (status) => {
     if (status === "ACTIVE") return "badge active";
-    if (status === "MAINTENANCE") return "badge maintenance";
+    if (status === "INACTIVE" || status === "MAINTENANCE") return "badge maintenance";
     return "badge standby";
   };
+
+  const busHistory = (busId) => tickets.filter((ticket) => ticket.busId === busId).slice(0, 3);
 
   return (
     <div className="page-shell">
@@ -147,6 +157,7 @@ export default function BusesPage() {
                 <th>Model</th>
                 <th>Route</th>
                 <th>Status</th>
+                <th>Maintenance History</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -189,11 +200,15 @@ export default function BusesPage() {
                           className="select"
                           value={editData.status}
                           onChange={(e) => setEditData({ ...editData, status: e.target.value })}
+                          disabled={bus.isUnderRepair}
                         >
                           <option value="ACTIVE">ACTIVE</option>
                           <option value="STANDBY">STANDBY</option>
-                          <option value="MAINTENANCE">MAINTENANCE</option>
+                          <option value="INACTIVE">INACTIVE</option>
                         </select>
+                      </td>
+                      <td>
+                        <span className="empty-state">Maintenance history visible after save.</span>
                       </td>
                       <td>
                         <div className="row-actions">
@@ -204,6 +219,9 @@ export default function BusesPage() {
                             Cancel
                           </button>
                         </div>
+                        {bus.isUnderRepair ? (
+                          <p className="empty-state">Bus is under repair and cannot be reactivated yet.</p>
+                        ) : null}
                       </td>
                     </>
                   ) : (
@@ -212,7 +230,25 @@ export default function BusesPage() {
                       <td>{bus.model}</td>
                       <td>{bus.route?.name || "Unassigned"}</td>
                       <td>
-                        <span className={statusClass(bus.status)}>{bus.status}</span>
+                        <div className="stack-sm">
+                          <span className={statusClass(bus.status)}>{bus.status}</span>
+                          {bus.isUnderRepair ? (
+                          <span className="empty-state">Inactive until repair is resolved</span>
+                          ) : null}
+                        </div>
+                      </td>
+                      <td>
+                        <div className="stack-sm">
+                          {busHistory(bus.id).length > 0 ? (
+                            busHistory(bus.id).map((ticket) => (
+                              <span key={ticket.id}>
+                                {ticket.status} · {ticket.issue}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="empty-state">No repair history</span>
+                          )}
+                        </div>
                       </td>
                       <td>
                         <div className="row-actions">
@@ -237,3 +273,4 @@ export default function BusesPage() {
     </div>
   );
 }
+

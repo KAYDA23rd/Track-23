@@ -1,3 +1,6 @@
+/* Landing page styles.
+   Covers the public brand experience, role-entry cards,
+   media sections, and responsive homepage behavior. */
 .landing-shell {
   position: relative;
   min-height: 100vh;
@@ -100,7 +103,7 @@
 .landing-role-grid {
   margin-top: 18px;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -270,3 +273,10 @@
     height: 180px;
   }
 }
+
+@media (max-width: 1080px) {
+  .landing-role-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+

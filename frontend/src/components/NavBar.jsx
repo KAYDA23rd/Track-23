@@ -1,10 +1,13 @@
+// Navigation bar component used by legacy or shared layouts.
+// Provides top-level branding and quick access actions.
 import { Link, useNavigate } from "react-router-dom";
+import { clearSession } from "../utils/authSession";
 
 export default function NavBar() {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
+    clearSession();
     navigate("/login");
   };
 
@@ -47,3 +50,4 @@ export default function NavBar() {
     </nav>
   );
 }
+

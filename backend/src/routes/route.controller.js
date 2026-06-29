@@ -7,6 +7,18 @@ const parseCoordinate = (value) => {
   return Number.isFinite(parsed) ? parsed : null;
 };
 
+const parseIntField = (value) => {
+  if (value === undefined || value === null || value === "") return null;
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+const parseFloatField = (value) => {
+  if (value === undefined || value === null || value === "") return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
 exports.createRoute = async (req, res) => {
   try {
     const {
@@ -17,6 +29,12 @@ exports.createRoute = async (req, res) => {
       startLng,
       endLat,
       endLng,
+      plannedDistanceKm,
+      targetDurationMinutes,
+      turnaroundMinutes,
+      plannedTripsPerShift,
+      peakHeadwayMinutes,
+      offPeakHeadwayMinutes,
     } = req.body;
 
     const route = await prisma.route.create({
@@ -28,6 +46,12 @@ exports.createRoute = async (req, res) => {
         startLng: parseCoordinate(startLng),
         endLat: parseCoordinate(endLat),
         endLng: parseCoordinate(endLng),
+        plannedDistanceKm: parseFloatField(plannedDistanceKm),
+        targetDurationMinutes: parseIntField(targetDurationMinutes),
+        turnaroundMinutes: parseIntField(turnaroundMinutes),
+        plannedTripsPerShift: parseIntField(plannedTripsPerShift),
+        peakHeadwayMinutes: parseIntField(peakHeadwayMinutes),
+        offPeakHeadwayMinutes: parseIntField(offPeakHeadwayMinutes),
       },
     });
 
@@ -57,6 +81,12 @@ exports.updateRoute = async (req, res) => {
       startLng,
       endLat,
       endLng,
+      plannedDistanceKm,
+      targetDurationMinutes,
+      turnaroundMinutes,
+      plannedTripsPerShift,
+      peakHeadwayMinutes,
+      offPeakHeadwayMinutes,
     } = req.body;
 
     const route = await prisma.route.update({
@@ -69,6 +99,12 @@ exports.updateRoute = async (req, res) => {
         startLng: parseCoordinate(startLng),
         endLat: parseCoordinate(endLat),
         endLng: parseCoordinate(endLng),
+        plannedDistanceKm: parseFloatField(plannedDistanceKm),
+        targetDurationMinutes: parseIntField(targetDurationMinutes),
+        turnaroundMinutes: parseIntField(turnaroundMinutes),
+        plannedTripsPerShift: parseIntField(plannedTripsPerShift),
+        peakHeadwayMinutes: parseIntField(peakHeadwayMinutes),
+        offPeakHeadwayMinutes: parseIntField(offPeakHeadwayMinutes),
       },
     });
 

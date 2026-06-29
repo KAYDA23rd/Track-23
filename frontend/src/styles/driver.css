@@ -1,3 +1,6 @@
+/* Driver app styles.
+   Covers the mobile driver console, navigation map, action
+   cards, and responsive operational layout. */
 .driver-shell {
   min-height: 100vh;
   padding: 24px;
@@ -451,3 +454,4 @@
     align-items: stretch;
   }
 }
+

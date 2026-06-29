@@ -18,6 +18,7 @@ enum Role {
 enum BusStatus {
   ACTIVE
   STANDBY
+  INACTIVE
   MAINTENANCE
 }
 
@@ -25,6 +26,21 @@ enum TicketStatus {
   OPEN
   ENROUTE
   RESOLVED
+}
+
+enum ShiftLifecycleStatus {
+  ASSIGNED
+  HANDED_OVER
+  ON_ROUTE
+  COMPLETED
+  CLOSED
+}
+
+enum RemittanceStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  ESCALATED
 }
 
 model User {
@@ -49,6 +65,12 @@ model Route {
   startLng   Float?
   endLat     Float?
   endLng     Float?
+  plannedDistanceKm    Float?
+  targetDurationMinutes Int?
+  turnaroundMinutes     Int?
+  plannedTripsPerShift  Int?
+  peakHeadwayMinutes    Int?
+  offPeakHeadwayMinutes Int?
   createdAt  DateTime @default(now())
 
   buses Bus[]
@@ -87,23 +109,54 @@ model Shift {
   startTime DateTime
   endTime   DateTime
   confirmed Boolean  @default(false)
+  status    ShiftLifecycleStatus @default(ASSIGNED)
+  issuedAt  DateTime?
+  issuedByUserId String?
+  handoverConfirmedAt DateTime?
+  handoverConfirmedByUserId String?
+  tripStartedAt DateTime?
+  completedAt DateTime?
+  closedAt DateTime?
+  closedByUserId String?
+  odometerOut Int?
+  odometerIn Int?
+  fuelOutPercent Int?
+  fuelInPercent Int?
+  handoverNotes String?
+  returnNotes String?
+  plannedTripsTarget Int?
+  targetDurationMinutesSnapshot Int?
+  completedTrips Int @default(0)
+  completedLoops Int @default(0)
+  passengerCount Int @default(0)
+  actualDurationMinutes Int?
+  tripPerformanceNotes String?
 
   bus    Bus    @relation(fields: [busId], references: [id])
   driver Driver @relation(fields: [driverId], references: [id])
+  remittances Remittance[]
 }
 
 model Remittance {
   id             String   @id @default(uuid())
   busId          String
   driverId       String
+  shiftId        String?
   date           DateTime
   expectedAmount Int
   reportedAmount Int
   approved       Boolean  @default(false)
+  status         RemittanceStatus @default(PENDING)
+  varianceAmount Int      @default(0)
+  varianceReason String?
+  reviewNotes    String?
+  reviewedAt     DateTime?
+  reviewedByUserId String?
   createdAt      DateTime @default(now())
 
   bus    Bus    @relation(fields: [busId], references: [id])
   driver Driver @relation(fields: [driverId], references: [id])
+  shift  Shift? @relation(fields: [shiftId], references: [id])
 }
 
 model MaintenanceTicket {
@@ -111,6 +164,18 @@ model MaintenanceTicket {
   busId      String
   issue      String
   status     TicketStatus @default(OPEN)
+  diagnosis  String?
+  repairNotes String?
+  partsUsed   String?
+  assignedMechanicName String?
+  workStartedAt DateTime?
+  workshopPriority Int?
+  brakeChecked Boolean @default(false)
+  engineChecked Boolean @default(false)
+  tireChecked Boolean @default(false)
+  electricalChecked Boolean @default(false)
+  roadTestPassed Boolean @default(false)
+  returnedToServiceAt DateTime?
   createdAt  DateTime     @default(now())
   resolvedAt DateTime?
 

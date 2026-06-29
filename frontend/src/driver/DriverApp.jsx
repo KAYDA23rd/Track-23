@@ -1,11 +1,20 @@
+// Driver operating console.
+// Combines live tracking, shift compliance, trip capture,
+// remittance submission, and issue reporting in one app.
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../api/api";
 import DriverNavigationMap from "./DriverNavigationMap";
 import "../styles/driver.css";
+import { clearSession, getDriverName, getDriverPhone } from "../utils/authSession";
 
 const formatMoney = (value) => `NGN ${Number(value || 0).toLocaleString()}`;
 
+/**
+ * DriverApp
+ * Driver-side operating console for live tracking, shift compliance,
+ * trip performance capture, remittance submission, and issue reporting.
+ */
 export default function DriverApp() {
   const geolocationSupported = typeof navigator !== "undefined" && "geolocation" in navigator;
   const [driver, setDriver] = useState(null);
@@ -22,16 +31,25 @@ export default function DriverApp() {
   const [activeTab, setActiveTab] = useState("shift");
   const [remittanceForm, setRemittanceForm] = useState({
     reportedAmount: "",
+    varianceReason: "",
   });
   const [issueForm, setIssueForm] = useState({ issue: "" });
+  const [performanceForm, setPerformanceForm] = useState({
+    completedTrips: "",
+    completedLoops: "",
+    passengerCount: "",
+    tripPerformanceNotes: "",
+  });
 
   const navigate = useNavigate();
   const watchIdRef = useRef(null);
   const lastSentAtRef = useRef(0);
 
   const loadData = async () => {
-    const phone = localStorage.getItem("driver_phone");
+    const phone = getDriverPhone();
 
+    // Load all driver-facing operational data together so the app reflects one
+    // coherent shift/remittance state after every action.
     const [driversRes, shiftsRes, remRes, ticketsRes, expectedRes] = await Promise.all([
       api.get("/drivers"),
       api.get("/shifts"),
@@ -51,7 +69,7 @@ export default function DriverApp() {
 
   useEffect(() => {
     const init = async () => {
-      const phone = localStorage.getItem("driver_phone");
+      const phone = getDriverPhone();
 
       const [driversRes, shiftsRes, remRes, ticketsRes, expectedRes] = await Promise.all([
         api.get("/drivers"),
@@ -116,6 +134,34 @@ export default function DriverApp() {
     return driverShifts.filter((shift) => new Date(shift.startTime).toDateString() === today).length;
   }, [driverShifts]);
 
+  // Driver actions are intentionally gated by shift lifecycle so the mobile app
+  // cannot bypass dispatch controls set by admin.
+  const canReportIssue = ["HANDED_OVER", "ON_ROUTE", "COMPLETED", "CLOSED"].includes(todayShift?.status || "");
+  const canSubmitRemittance = todayShift?.status === "COMPLETED";
+  const canUpdatePerformance = ["HANDED_OVER", "ON_ROUTE", "COMPLETED"].includes(todayShift?.status || "");
+
+  useEffect(() => {
+    const nextPerformanceForm = !todayShift
+      ? {
+          completedTrips: "",
+          completedLoops: "",
+          passengerCount: "",
+          tripPerformanceNotes: "",
+        }
+      : {
+          completedTrips: todayShift.completedTrips?.toString() || "",
+          completedLoops: todayShift.completedLoops?.toString() || "",
+          passengerCount: todayShift.passengerCount?.toString() || "",
+          tripPerformanceNotes: todayShift.tripPerformanceNotes || "",
+        };
+
+    const syncId = window.setTimeout(() => {
+      setPerformanceForm(nextPerformanceForm);
+    }, 0);
+
+    return () => window.clearTimeout(syncId);
+  }, [todayShift]);
+
   const submitRemittance = async (e) => {
     e.preventDefault();
 
@@ -129,13 +175,19 @@ export default function DriverApp() {
       return;
     }
 
+    if (!canSubmitRemittance) {
+      alert("Shift must be completed before remittance can be submitted.");
+      return;
+    }
+
     await api.post("/remittances", {
       busId: assignedBusId,
       driverId: driver.id,
       reportedAmount: Number(remittanceForm.reportedAmount),
+      varianceReason: remittanceForm.varianceReason,
     });
 
-    setRemittanceForm({ reportedAmount: "" });
+    setRemittanceForm({ reportedAmount: "", varianceReason: "" });
     loadData();
   };
 
@@ -147,6 +199,13 @@ export default function DriverApp() {
       return;
     }
 
+    if (!canReportIssue) {
+      alert("Bus handover must be confirmed before issue reporting can begin.");
+      return;
+    }
+
+    // Fault tickets immediately feed the maintenance workflow, which can
+    // deactivate the bus and block future dispatch.
     await api.post("/maintenance", {
       busId: assignedBusId,
       issue: issueForm.issue,
@@ -156,11 +215,36 @@ export default function DriverApp() {
     loadData();
   };
 
+  const submitPerformance = async (e) => {
+    e.preventDefault();
+
+    if (!todayShift) {
+      alert("No active shift found.");
+      return;
+    }
+
+    if (!canUpdatePerformance) {
+      alert("Trip performance can only be updated after handover and before final closure.");
+      return;
+    }
+
+    await api.put(`/shifts/${todayShift.id}/performance`, {
+      completedTrips: Number(performanceForm.completedTrips || 0),
+      completedLoops: Number(performanceForm.completedLoops || 0),
+      passengerCount: Number(performanceForm.passengerCount || 0),
+      tripPerformanceNotes: performanceForm.tripPerformanceNotes,
+    });
+
+    await loadData();
+  };
+
   useEffect(() => {
     if (!geolocationSupported) {
       return undefined;
     }
 
+    // Tracking starts automatically on login and stays on. We only throttle the
+    // network sync interval so the device is not spamming the backend.
     watchIdRef.current = navigator.geolocation.watchPosition(
       async (position) => {
         const lat = position.coords.latitude;
@@ -203,6 +287,8 @@ export default function DriverApp() {
       },
     );
 
+    // Stop the browser watch cleanly when the app unmounts so we do not leave
+    // orphaned geolocation watchers running.
     return () => {
       if (watchIdRef.current != null) {
         navigator.geolocation.clearWatch(watchIdRef.current);
@@ -212,9 +298,7 @@ export default function DriverApp() {
   }, [assignedBusId, geolocationSupported]);
 
   const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("driver_phone");
-    localStorage.removeItem("driver_name");
+    clearSession();
     navigate("/driver/login");
   };
 
@@ -226,7 +310,7 @@ export default function DriverApp() {
             <Link className="driver-top-kicker" to="/">
               Track23 Driver
             </Link>
-            <h1>{localStorage.getItem("driver_name") || "Driver Console"}</h1>
+            <h1>{getDriverName() || "Driver Console"}</h1>
             <p>{driver ? driver.phone : "Driver profile lookup in progress"}</p>
           </div>
 
@@ -254,10 +338,28 @@ export default function DriverApp() {
                   <strong>Route:</strong> {todayShift.bus?.route?.name || "-"}
                 </p>
                 <p>
+                  <strong>Status:</strong> {todayShift.status}
+                </p>
+                <p>
+                  <strong>Handover:</strong> {todayShift.confirmed ? "Confirmed" : "Pending admin confirmation"}
+                </p>
+                <p>
                   <strong>Start:</strong> {new Date(todayShift.startTime).toLocaleString()}
                 </p>
                 <p>
                   <strong>End:</strong> {new Date(todayShift.endTime).toLocaleString()}
+                </p>
+                <p>
+                  <strong>Compliance:</strong>{" "}
+                  {todayShift.status === "ASSIGNED"
+                    ? "Awaiting admin handover"
+                    : todayShift.status === "HANDED_OVER"
+                      ? "Vehicle issued, waiting to move on route"
+                      : todayShift.status === "ON_ROUTE"
+                        ? "Live on corridor"
+                        : todayShift.status === "COMPLETED"
+                          ? "Ready for remittance"
+                          : "Shift closed"}
                 </p>
               </div>
             ) : (
@@ -267,21 +369,25 @@ export default function DriverApp() {
 
           <article className="driver-card">
             <h3>Today&apos;s Stats</h3>
-            <div className="driver-stats-grid">
-              <div>
-                <strong>{todayTrips}</strong>
-                <span>Shifts</span>
+              <div className="driver-stats-grid">
+                <div>
+                  <strong>{todayTrips}</strong>
+                  <span>Shifts</span>
+                </div>
+                <div>
+                  <strong>{todayShift?.completedTrips || 0}</strong>
+                  <span>Trips</span>
+                </div>
+                <div>
+                  <strong>{todayShift?.passengerCount || 0}</strong>
+                  <span>Passengers</span>
+                </div>
+                <div>
+                  <strong>{formatMoney(todayCollection)}</strong>
+                  <span>Collection</span>
+                </div>
               </div>
-              <div>
-                <strong>{driverRemittances.length}</strong>
-                <span>Remittances</span>
-              </div>
-              <div>
-                <strong>{formatMoney(todayCollection)}</strong>
-                <span>Collection</span>
-              </div>
-            </div>
-          </article>
+            </article>
         </section>
 
         <section className="driver-tabs">
@@ -330,6 +436,60 @@ export default function DriverApp() {
                 Last sync: {lastLocationSyncAt ? lastLocationSyncAt.toLocaleTimeString() : "Not synced yet"}
               </p>
               <p className="driver-muted">Tracking is mandatory while logged in.</p>
+              <p className="driver-muted">
+                Shift access: {todayShift ? todayShift.status : "No active assignment"}
+              </p>
+            </article>
+
+            <article className="driver-card">
+              <h3>Trip Performance</h3>
+              <form className="driver-form" onSubmit={submitPerformance}>
+                <input
+                  className="driver-input"
+                  min="0"
+                  onChange={(e) => setPerformanceForm((prev) => ({ ...prev, completedTrips: e.target.value }))}
+                  placeholder="Completed trips"
+                  type="number"
+                  value={performanceForm.completedTrips}
+                />
+
+                <input
+                  className="driver-input"
+                  min="0"
+                  onChange={(e) => setPerformanceForm((prev) => ({ ...prev, completedLoops: e.target.value }))}
+                  placeholder="Completed loops"
+                  type="number"
+                  value={performanceForm.completedLoops}
+                />
+
+                <input
+                  className="driver-input"
+                  min="0"
+                  onChange={(e) => setPerformanceForm((prev) => ({ ...prev, passengerCount: e.target.value }))}
+                  placeholder="Passenger count"
+                  type="number"
+                  value={performanceForm.passengerCount}
+                />
+
+                <textarea
+                  className="driver-input driver-textarea"
+                  onChange={(e) =>
+                    setPerformanceForm((prev) => ({ ...prev, tripPerformanceNotes: e.target.value }))
+                  }
+                  placeholder="Trip notes, congestion issues, turnaround observations"
+                  value={performanceForm.tripPerformanceNotes}
+                />
+
+                <button className="driver-btn driver-btn-primary" disabled={!canUpdatePerformance} type="submit">
+                  Save Performance
+                </button>
+              </form>
+              <p className="driver-muted">
+                Avg passengers per trip:{" "}
+                {todayShift?.completedTrips > 0
+                  ? (todayShift.passengerCount / todayShift.completedTrips).toFixed(1)
+                  : "0.0"}
+              </p>
             </article>
 
             <article className="driver-card">
@@ -363,10 +523,20 @@ export default function DriverApp() {
                   value={remittanceForm.reportedAmount}
                 />
 
-                <button className="driver-btn driver-btn-primary" type="submit">
+                <input
+                  className="driver-input"
+                  onChange={(e) => setRemittanceForm({ ...remittanceForm, varianceReason: e.target.value })}
+                  placeholder="Variance reason if amount differs"
+                  value={remittanceForm.varianceReason || ""}
+                />
+
+                <button className="driver-btn driver-btn-primary" disabled={!canSubmitRemittance} type="submit">
                   Submit
                 </button>
               </form>
+              {!canSubmitRemittance ? (
+                <p className="driver-muted">Admin must mark the shift completed before remittance submission.</p>
+              ) : null}
             </article>
 
             <article className="driver-card">
@@ -387,10 +557,13 @@ export default function DriverApp() {
                   value={issueForm.issue}
                 />
 
-                <button className="driver-btn driver-btn-primary" type="submit">
+                <button className="driver-btn driver-btn-primary" disabled={!canReportIssue} type="submit">
                   Report Issue
                 </button>
               </form>
+              {!canReportIssue ? (
+                <p className="driver-muted">Issue reporting opens after handover confirmation.</p>
+              ) : null}
             </article>
           </section>
         )}
@@ -452,3 +625,4 @@ export default function DriverApp() {
     </div>
   );
 }
+

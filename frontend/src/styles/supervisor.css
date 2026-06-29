@@ -1,0 +1,401 @@
+/* Supervisor app styles.
+   Covers the control tower, alert center, watchlists, and
+   responsive supervisor operations layout. */
+.supervisor-shell {
+  min-height: 100vh;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(61, 169, 252, 0.16), transparent 30%),
+    radial-gradient(circle at 100% 10%, rgba(255, 120, 95, 0.12), transparent 26%),
+    linear-gradient(160deg, #0e1622 0%, #142433 46%, #1c3448 100%);
+  color: #eef6ff;
+}
+
+.supervisor-login-card,
+.supervisor-app {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+}
+
+.supervisor-login-card {
+  margin-top: 10vh;
+  max-width: 470px;
+  padding: 28px;
+  border-radius: 22px;
+  border: 1px solid rgba(104, 191, 255, 0.18);
+  background: linear-gradient(180deg, rgba(16, 25, 36, 0.97) 0%, rgba(10, 18, 28, 0.96) 100%);
+  box-shadow: 0 26px 56px rgba(2, 7, 14, 0.46);
+}
+
+.supervisor-login-kicker {
+  color: #7ec6ff;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.supervisor-login-card h1,
+.supervisor-topbar h1,
+.supervisor-panel h2,
+.supervisor-alert-card h3,
+.supervisor-ticket-card h3,
+.supervisor-ops-card h3,
+.supervisor-watch-card h3 {
+  margin: 8px 0;
+  color: #f8fbff;
+}
+
+.supervisor-login-note,
+.supervisor-topbar p,
+.supervisor-panel p,
+.supervisor-alert-card p,
+.supervisor-empty,
+.supervisor-ticket-meta,
+.supervisor-ops-meta,
+.supervisor-watch-card span {
+  color: #adc1d3;
+}
+
+.supervisor-login-form {
+  display: grid;
+  gap: 10px;
+}
+
+.supervisor-mode-switch {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.supervisor-mode-btn {
+  border: 1px solid rgba(181, 198, 214, 0.24);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #d7e4ef;
+  padding: 9px 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.supervisor-mode-btn.is-active {
+  background: rgba(65, 177, 255, 0.14);
+  border-color: rgba(65, 177, 255, 0.38);
+  color: #97d7ff;
+}
+
+.supervisor-input {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid rgba(181, 198, 214, 0.24);
+  background: rgba(255, 255, 255, 0.04);
+  color: #f3f8fd;
+  padding: 11px 12px;
+}
+
+.supervisor-input:focus {
+  outline: none;
+  border-color: #51b3ff;
+  box-shadow: 0 0 0 3px rgba(81, 179, 255, 0.18);
+}
+
+.supervisor-btn {
+  border: 1px solid transparent;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+
+.supervisor-btn-primary {
+  background: linear-gradient(135deg, #44a6ff 0%, #2375ff 100%);
+  color: #eff7ff;
+}
+
+.supervisor-btn-primary:hover {
+  filter: saturate(1.05);
+  transform: translateY(-1px);
+}
+
+.supervisor-btn-ghost {
+  background: rgba(255, 255, 255, 0.06);
+  color: #eef6ff;
+  border-color: rgba(173, 190, 207, 0.22);
+}
+
+.supervisor-login-error,
+.supervisor-login-notice {
+  margin: 0 0 10px;
+  border-radius: 10px;
+  padding: 9px 10px;
+}
+
+.supervisor-login-error {
+  border: 1px solid rgba(255, 124, 124, 0.34);
+  background: rgba(89, 28, 28, 0.36);
+  color: #ffd6d6;
+}
+
+.supervisor-login-notice {
+  border: 1px solid rgba(81, 179, 255, 0.3);
+  background: rgba(35, 86, 134, 0.22);
+  color: #c7ebff;
+}
+
+.supervisor-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.supervisor-top-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.supervisor-status {
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(81, 179, 255, 0.28);
+  background: rgba(81, 179, 255, 0.12);
+  color: #a8deff;
+  font-weight: 700;
+}
+
+.supervisor-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.supervisor-card,
+.supervisor-panel {
+  border-radius: 18px;
+  border: 1px solid rgba(173, 190, 207, 0.14);
+  background: linear-gradient(180deg, rgba(22, 33, 46, 0.94) 0%, rgba(14, 22, 32, 0.94) 100%);
+  padding: 16px;
+}
+
+.supervisor-panel-primary {
+  background:
+    linear-gradient(180deg, rgba(23, 38, 56, 0.97) 0%, rgba(16, 26, 38, 0.98) 100%);
+}
+
+.supervisor-card span {
+  color: #adc1d3;
+}
+
+.supervisor-card strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 2rem;
+  color: #a8deff;
+}
+
+.supervisor-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.supervisor-panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.supervisor-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.supervisor-filter {
+  border: 1px solid rgba(173, 190, 207, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #d2deea;
+  padding: 9px 12px;
+  font-weight: 700;
+  cursor: pointer;
+  text-transform: capitalize;
+}
+
+.supervisor-filter.is-active {
+  background: linear-gradient(135deg, #44a6ff 0%, #2375ff 100%);
+  color: #eff7ff;
+  border-color: rgba(81, 179, 255, 0.3);
+}
+
+.supervisor-alert-list,
+.supervisor-ticket-list,
+.supervisor-ops-list,
+.supervisor-watchlist {
+  display: grid;
+  gap: 12px;
+}
+
+.supervisor-alert-card,
+.supervisor-ticket-card,
+.supervisor-ops-card,
+.supervisor-watch-card {
+  border-radius: 16px;
+  border: 1px solid rgba(178, 193, 208, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 14px;
+}
+
+.supervisor-alert-head,
+.supervisor-ticket-head,
+.supervisor-ops-head,
+.supervisor-watch-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.supervisor-alert-card p,
+.supervisor-ticket-issue {
+  margin: 8px 0 0;
+}
+
+.supervisor-alert-meta,
+.supervisor-ticket-meta,
+.supervisor-ops-meta,
+.supervisor-watch-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+  font-size: 0.84rem;
+}
+
+.supervisor-badge {
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.supervisor-badge-critical {
+  background: rgba(255, 91, 91, 0.14);
+  color: #ffabab;
+}
+
+.supervisor-badge-high {
+  background: rgba(255, 166, 90, 0.14);
+  color: #ffc784;
+}
+
+.supervisor-badge-medium {
+  background: rgba(106, 181, 255, 0.14);
+  color: #9cdbff;
+}
+
+.supervisor-badge-low {
+  background: rgba(93, 214, 173, 0.16);
+  color: #8af1ca;
+}
+
+.supervisor-kpi-stack {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.supervisor-kpi {
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 14px;
+}
+
+.supervisor-kpi strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 1.7rem;
+  color: #f8fbff;
+}
+
+.supervisor-table-wrap {
+  overflow: auto;
+}
+
+.supervisor-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 640px;
+}
+
+.supervisor-table th,
+.supervisor-table td {
+  padding: 10px 8px;
+  border-bottom: 1px solid rgba(190, 205, 220, 0.1);
+  text-align: left;
+}
+
+.supervisor-table th {
+  color: #90a7ba;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.supervisor-table td {
+  color: #e7f0f8;
+  font-size: 0.92rem;
+}
+
+.supervisor-empty {
+  margin: 0;
+}
+
+@media (max-width: 1000px) {
+  .supervisor-shell {
+    padding: 12px;
+  }
+
+  .supervisor-summary-grid,
+  .supervisor-grid,
+  .supervisor-kpi-stack {
+    grid-template-columns: 1fr;
+  }
+
+  .supervisor-topbar,
+  .supervisor-panel-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .supervisor-top-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 640px) {
+  .supervisor-login-card {
+    margin-top: 6vh;
+    padding: 22px;
+  }
+
+  .supervisor-btn {
+    width: 100%;
+  }
+
+  .supervisor-filter-row,
+  .supervisor-top-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+}
+

@@ -1,4 +1,4 @@
-[dotenv@17.2.3] injecting env (2) from .env -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (2) from .env -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
 ✅ Mounting /auth routes
 ✅ Mounting /routes routes
 ✅ Mounting /buses routes

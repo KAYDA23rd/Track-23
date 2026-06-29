@@ -1,3 +1,6 @@
+// Shared fleet map for corridor monitoring.
+// Renders the fixed launch route, stops, and live bus or
+// driver activity on the Lagos operating corridor.
 import { useEffect, useMemo, useState } from "react";
 import { MapContainer, Marker, Polyline, Popup, TileLayer, useMap } from "react-leaflet";
 import api from "../api/api";
@@ -306,3 +309,4 @@ export default function FleetMap() {
     </MapContainer>
   );
 }
+

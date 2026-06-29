@@ -1,28 +1,43 @@
+// Public landing page for Track23.
+// Introduces the company, provides role-based entry points,
+// and adapts actions based on the current logged-in user.
 import { Link } from "react-router-dom";
 import "../styles/landing.css";
+import { clearSession, decodeRole } from "../utils/authSession";
 
 const decodeRoleFromToken = () => {
-  try {
-    const token = localStorage.getItem("token");
-    if (!token) return null;
-    const [, payload] = token.split(".");
-    if (!payload) return null;
-    const parsed = JSON.parse(atob(payload));
-    return parsed.role || null;
-  } catch {
-    return null;
-  }
+  return decodeRole();
 };
+
+function PortalLink({ children, className, to }) {
+  return (
+    <Link className={className} rel="noreferrer" target="_blank" to={to}>
+      {children}
+    </Link>
+  );
+}
 
 export default function LandingPage() {
   const role = decodeRoleFromToken();
   const isAdmin = role === "ADMIN" || role === "SUPER_ADMIN";
   const isDriver = role === "DRIVER";
+  const isMechanic = role === "MECHANIC";
+  const isSupervisor = role === "SUPERVISOR";
+  const roleLabel =
+    role === "SUPER_ADMIN"
+      ? "Super admin"
+      : role === "ADMIN"
+        ? "Admin"
+        : role === "SUPERVISOR"
+          ? "Supervisor"
+          : role === "MECHANIC"
+            ? "Mechanic"
+            : role === "DRIVER"
+              ? "Driver"
+              : "User";
 
   const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("driver_phone");
-    localStorage.removeItem("driver_name");
+    clearSession();
     window.location.href = "/";
   };
 
@@ -50,15 +65,15 @@ export default function LandingPage() {
             <h3>Admin Portal</h3>
             <p>Monitor drivers, assign shifts, track remittances, and manage route performance.</p>
             {!role ? (
-              <Link className="landing-btn landing-btn-primary" to="/login">
+              <PortalLink className="landing-btn landing-btn-primary" to="/login">
                 Enter as Admin
-              </Link>
+              </PortalLink>
             ) : isAdmin ? (
-              <Link className="landing-btn landing-btn-primary" to="/dashboard">
+              <PortalLink className="landing-btn landing-btn-primary" to="/dashboard">
                 Open Admin Console
-              </Link>
+              </PortalLink>
             ) : (
-              <span className="landing-role-note">Driver account detected</span>
+              <span className="landing-role-note">{roleLabel} account detected</span>
             )}
           </article>
 
@@ -66,15 +81,47 @@ export default function LandingPage() {
             <h3>Driver Portal</h3>
             <p>Use live navigation, stay tracked in real-time, submit remittances, and report issues.</p>
             {!role ? (
-              <Link className="landing-btn landing-btn-secondary" to="/driver/login">
+              <PortalLink className="landing-btn landing-btn-secondary" to="/driver/login">
                 Enter as Driver
-              </Link>
+              </PortalLink>
             ) : isDriver ? (
-              <Link className="landing-btn landing-btn-secondary" to="/driver/app">
+              <PortalLink className="landing-btn landing-btn-secondary" to="/driver/app">
                 Open Driver Console
-              </Link>
+              </PortalLink>
             ) : (
-              <span className="landing-role-note">Admin account detected</span>
+              <span className="landing-role-note">{roleLabel} account detected</span>
+            )}
+          </article>
+
+          <article className="landing-role-card">
+            <h3>Mechanic Portal</h3>
+            <p>Take maintenance jobs, move buses through repair, and return vehicles to service readiness.</p>
+            {!role ? (
+              <PortalLink className="landing-btn landing-btn-secondary" to="/mechanic/login">
+                Enter as Mechanic
+              </PortalLink>
+            ) : isMechanic || isAdmin ? (
+              <PortalLink className="landing-btn landing-btn-secondary" to="/mechanic/app">
+                Open Mechanic Console
+              </PortalLink>
+            ) : (
+              <span className="landing-role-note">{roleLabel} account detected</span>
+            )}
+          </article>
+
+          <article className="landing-role-card">
+            <h3>Supervisor Portal</h3>
+            <p>Run the control tower, escalate live incidents, and coordinate route, workshop, and remittance response.</p>
+            {!role ? (
+              <PortalLink className="landing-btn landing-btn-secondary" to="/supervisor/login">
+                Enter as Supervisor
+              </PortalLink>
+            ) : isSupervisor || isAdmin ? (
+              <PortalLink className="landing-btn landing-btn-secondary" to="/supervisor/app">
+                Open Supervisor Console
+              </PortalLink>
+            ) : (
+              <span className="landing-role-note">{roleLabel} account detected</span>
             )}
           </article>
         </section>
@@ -128,3 +175,4 @@ export default function LandingPage() {
     </div>
   );
 }
+

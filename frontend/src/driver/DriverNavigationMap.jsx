@@ -1,3 +1,6 @@
+// Driver navigation map.
+// Shows route focus, live location context, and the
+// expanded navigation experience during active duty.
 import { useEffect, useMemo, useState } from "react";
 import { MapContainer, Marker, Polyline, Popup, TileLayer, useMap } from "react-leaflet";
 
@@ -249,3 +252,4 @@ export default function DriverNavigationMap({
     </>
   );
 }
+

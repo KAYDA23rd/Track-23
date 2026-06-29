@@ -1,0 +1,409 @@
+/* Mechanic app styles.
+   Covers workshop login, ticket board, repair forms, and
+   responsive mechanic console presentation. */
+.mechanic-shell {
+  min-height: 100vh;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 15% 0%, rgba(255, 184, 76, 0.18), transparent 30%),
+    linear-gradient(160deg, #10151d 0%, #172334 52%, #203449 100%);
+  color: #eef5fb;
+}
+
+.mechanic-login-card,
+.mechanic-app {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+}
+
+.mechanic-login-card {
+  margin-top: 10vh;
+  max-width: 460px;
+  padding: 28px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 208, 124, 0.18);
+  background: linear-gradient(180deg, rgba(24, 31, 42, 0.96) 0%, rgba(16, 22, 30, 0.96) 100%);
+  box-shadow: 0 24px 56px rgba(4, 8, 12, 0.42);
+}
+
+.mechanic-login-kicker {
+  color: #ffc56c;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.mechanic-login-card h1,
+.mechanic-topbar h1,
+.mechanic-board-head h2,
+.mechanic-ticket-card h3 {
+  margin: 8px 0;
+  color: #f8fbff;
+}
+
+.mechanic-login-note,
+.mechanic-topbar p,
+.mechanic-board-head p,
+.mechanic-ticket-card p,
+.mechanic-ticket-meta,
+.mechanic-empty {
+  color: #a9bac9;
+}
+
+.mechanic-login-form {
+  display: grid;
+  gap: 10px;
+}
+
+.mechanic-mode-switch {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.mechanic-mode-btn {
+  border: 1px solid rgba(181, 198, 214, 0.24);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #d7e4ef;
+  padding: 9px 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.mechanic-mode-btn.is-active {
+  background: rgba(255, 190, 90, 0.14);
+  border-color: rgba(255, 190, 90, 0.38);
+  color: #ffcb74;
+}
+
+.mechanic-input {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid rgba(181, 198, 214, 0.24);
+  background: rgba(255, 255, 255, 0.04);
+  color: #f3f8fd;
+  padding: 11px 12px;
+}
+
+.mechanic-input:focus {
+  outline: none;
+  border-color: #ffbe5a;
+  box-shadow: 0 0 0 3px rgba(255, 190, 90, 0.18);
+}
+
+.mechanic-btn {
+  border: 1px solid transparent;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+
+.mechanic-btn-primary {
+  background: linear-gradient(135deg, #ffbe5a 0%, #ff9f38 100%);
+  color: #221200;
+}
+
+.mechanic-btn-primary:hover {
+  filter: saturate(1.06);
+  transform: translateY(-1px);
+}
+
+.mechanic-btn-ghost {
+  background: rgba(255, 255, 255, 0.06);
+  color: #e6eef6;
+  border-color: rgba(173, 190, 207, 0.24);
+}
+
+.mechanic-btn-ghost:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.mechanic-login-error {
+  margin: 0;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 124, 124, 0.34);
+  background: rgba(89, 28, 28, 0.36);
+  color: #ffd6d6;
+  padding: 9px 10px;
+}
+
+.mechanic-login-notice {
+  margin: 0 0 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 190, 90, 0.28);
+  background: rgba(130, 88, 19, 0.22);
+  color: #ffd89a;
+  padding: 9px 10px;
+}
+
+.mechanic-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.mechanic-top-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.mechanic-status {
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 190, 90, 0.34);
+  background: rgba(255, 190, 90, 0.12);
+  color: #ffcb74;
+  font-weight: 700;
+}
+
+.mechanic-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.mechanic-card {
+  border-radius: 18px;
+  border: 1px solid rgba(173, 190, 207, 0.14);
+  background: linear-gradient(180deg, rgba(25, 34, 46, 0.94) 0%, rgba(18, 25, 34, 0.94) 100%);
+  padding: 16px;
+}
+
+.mechanic-card span {
+  color: #a9bac9;
+}
+
+.mechanic-card strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 2rem;
+  color: #ffcb74;
+}
+
+.mechanic-board-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.mechanic-board-controls {
+  display: grid;
+  gap: 10px;
+  justify-items: end;
+}
+
+.mechanic-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.mechanic-select {
+  min-width: 180px;
+  border-radius: 12px;
+  border: 1px solid rgba(173, 190, 207, 0.18);
+  background: rgba(255, 255, 255, 0.06);
+  color: #eef5fb;
+  padding: 10px 12px;
+}
+
+.mechanic-filter {
+  border: 1px solid rgba(173, 190, 207, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #d2deea;
+  padding: 9px 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.mechanic-filter.is-active {
+  background: linear-gradient(135deg, #ffbe5a 0%, #ff9f38 100%);
+  color: #1e1000;
+  border-color: rgba(255, 190, 90, 0.3);
+}
+
+.mechanic-ticket-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.mechanic-ticket-card {
+  border-radius: 16px;
+  border: 1px solid rgba(178, 193, 208, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 14px;
+}
+
+.mechanic-ticket-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.mechanic-ticket-head p,
+.mechanic-ticket-issue {
+  margin: 0;
+}
+
+.mechanic-ticket-issue {
+  margin-top: 10px;
+  color: #edf3f9;
+}
+
+.mechanic-ticket-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 0.84rem;
+  margin-top: 10px;
+}
+
+.mechanic-form-grid {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.mechanic-textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.mechanic-checklist {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.mechanic-checkitem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 8px 10px;
+  color: #dce8f2;
+}
+
+.mechanic-ticket-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.mechanic-badge {
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.mechanic-badge-open {
+  background: rgba(255, 96, 96, 0.14);
+  color: #ff9898;
+}
+
+.mechanic-badge-enroute {
+  background: rgba(255, 190, 90, 0.14);
+  color: #ffcb74;
+}
+
+.mechanic-badge-resolved {
+  background: rgba(89, 220, 166, 0.16);
+  color: #7df2c4;
+}
+
+.mechanic-history-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.mechanic-history-card {
+  border-radius: 16px;
+  border: 1px solid rgba(178, 193, 208, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 14px;
+}
+
+.mechanic-history-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.mechanic-history-head p,
+.mechanic-history-item p,
+.mechanic-history-item small {
+  color: #a9bac9;
+}
+
+.mechanic-history-list {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.mechanic-history-item {
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 10px 12px;
+}
+
+.mechanic-history-item span {
+  display: inline-block;
+  margin-top: 4px;
+  color: #ffcb74;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  .mechanic-shell {
+    padding: 12px;
+  }
+
+  .mechanic-topbar,
+  .mechanic-board-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .mechanic-summary-grid,
+  .mechanic-ticket-grid,
+  .mechanic-history-grid,
+  .mechanic-form-grid,
+  .mechanic-checklist {
+    grid-template-columns: 1fr;
+  }
+
+  .mechanic-top-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .mechanic-board-controls {
+    width: 100%;
+    justify-items: stretch;
+  }
+}
+
